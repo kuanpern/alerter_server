@@ -1,9 +1,12 @@
 ## Alerter server
-a really simple server to receive alert message and put to database, or send to slack.
+A really simple server to receive alert message and put to database, or send to slack.
 
 ### Installation
-
-
+```
+$ git clone https://kuanpern@bitbucket.org/kuanpern/alerter_server.git
+$ cd alerter_server
+$ virtualenv -ppython3 venv; venv/bin/pip install requirements.txt
+```
 
 ### Running the application
 Start the webserver with
