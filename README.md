@@ -11,12 +11,15 @@ $ virtualenv -ppython3 venv; venv/bin/pip install requirements.txt
 ### Running the applications
 Start the webserver with
 ```
-usage: app.py [-h] --config CONFIG
+usage: app.py [-h] [--host HOST] [--port PORT] [--debug DEBUG] --config CONFIG
 
 Send alerts through emails
 
 optional arguments:
   -h, --help       show this help message and exit
+  --host HOST      server host name
+  --port PORT      port number
+  --debug DEBUG    debug mode
   --config CONFIG  path to configuration file (.yaml)
 ```
 
