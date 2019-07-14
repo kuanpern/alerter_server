@@ -30,7 +30,7 @@ class Controller:
 		"""
 
 		self.conn_str = conn_str
-		self.conn_engine = sqlalchemy.create_engine(self.conn_str)
+		self.conn_engine = sqlalchemy.create_engine(self.conn_str, pool_pre_ping=True)
 		self.db_name = self.conn_engine.url.database
 		self.metadata = sqlalchemy.MetaData()
 
@@ -165,7 +165,7 @@ class Controller:
 	############################
 	###### CRUD for alerts #####
 	############################
-	def add_alert(self, title, msg, channel, alert_uuid=None, is_processed=False, processed_at=None):
+	def add_alert(self, title, msg, channel, tempo, alert_uuid=None, is_processed=False, processed_at=None):
 		"""Add a alert to the alert table
 
 		Args:
@@ -196,6 +196,7 @@ class Controller:
 		  "title"    : title,
 		  "msg"      : msg,
 		  "channel"  : channel,
+		  "tempo"    : tempo,
 		  "_uuid"    : alert_uuid,
 		  "_updated_at"  : curtime,
 		  "_IsProcessed" : is_processed,
