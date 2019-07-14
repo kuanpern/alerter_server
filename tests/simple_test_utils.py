@@ -1,7 +1,7 @@
 import utils
 import uuid
 
-conn_str = 'mysql://admin:password@scubesqldb01.cpljad6mmfek.ap-southeast-1.rds.amazonaws.com:3306/alerts'
+conn_str = 'mysql://admin:password@hostname:3306/alerts'
 
 controller = utils.Controller(conn_str)
 
