@@ -23,7 +23,8 @@ logger.addHandler(_handler)
 
 # timestamp
 timestamp = time.time()
-timestamp_str = pd.Timestamp.fromtimestamp(timestamp).split('.')[0]
+timestamp_str = str(pd.Timestamp.fromtimestamp(timestamp)).split('.')[0]
+print(timestamp_str)
 
 def get_alert_tables(engine):
 	logger.info('getting tables ...')
