@@ -1,12 +1,15 @@
+import os
+import time
 import yaml
 import uuid
 import sqlalchemy
 import opends.easy_messaging
 from multiprocessing import Process
-from flask import Flask
-from flask import abort
+import flask
+from flask import Flask, abort
 import utils
 import logging
+logger = logging.getLogger()
 
 # initialize flask app
 app = Flask(__name__)
@@ -14,12 +17,11 @@ app = Flask(__name__)
 # read configuration
 config_file = os.environ['HOME']+'/.keys/scube_alerter.key.yaml'
 with open(config_file, 'r') as fin:
-	conn_str = yaml.load(fin, Loader=yaml.SafeLoader)
+	configs = yaml.load(fin, Loader=yaml.SafeLoader)
+	conn_str    = configs['conn_str']
+	slack_token = configs['slack_token']
 # end with
-
-tokens = {}
-
-cmd = 'SELECT token FROM alerts_backend_tokens WHERE status = "active"';
+engine = sqlalchemy.create_engine(conn_str)
 
 
 # initialize the controller
@@ -45,17 +47,34 @@ def send_msg(inputs):
 	channel = inputs['channel']
 
 	text = '[{tblname}] | [{title}]\n{msg}'.format(tblname=tblname, title=title, msg=msg)
-	return opends.easy_messaging.send_slack_message(
+	response = opends.easy_messaging.send_slack_message(
 		channel   = channel,
 		text      = text, 
 		token     = slack_token, 
 		from_user = 'bot'
 	) # end message
+
+	# still register to DB
+	inputs['is_processed'] = True
+	inputs['processed_at'] = time.time()
+	put_db(inputs)
 # end def
 
 @app.route('/<tblname>', methods = ['POST'])
 def recv(tblname):
 	content = flask.request.get_json()
+
+	# ensure table is there
+	if tblname not in engine.table_names():
+		return 'Unregistered endpoint "{tblname}"'.format(tblname=tblname), 400
+	# end if
+
+	# get tokens
+	cmd = 'SELECT token FROM {tblname}_tokens WHERE status = "active"'.format(tblname=tblname)
+	conn = engine.connect()
+	res = conn.execute(cmd)
+	conn.close()
+	tokens = [_[0] for _ in res]
 
 	# authentication
 	token = content.get('token', None)
@@ -82,3 +101,9 @@ def recv(tblname):
 
 	return flask.jsonify({'uuid': _uuid})
 # end def
+
+
+
+if __name__ == '__main__':
+	app.run(host='0.0.0.0', port=8080, debug=True)
+
