@@ -9,7 +9,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Text, REAL, String, Boolean
 
-class Controller:
+class AlertController:
 	alert_cols = ['_uuid', 'title', 'msg', 'channel', '_updated_at', '_IsProcessed', '_processed_at']
 	alert_template = {_: None for _ in alert_cols}
 
