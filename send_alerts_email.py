@@ -1,14 +1,15 @@
 import os
 import sys
-import yaml
 import time
-import sqlalchemy
 import pandas as pd
 import uuid
 import opends
 import opends.easymail
-import datetime
 import logging
+from models.alert import Alert
+from models.subscription import Subscription
+from dotenv import load_dotenv
+load_dotenv()
 _handler = logging.StreamHandler(sys.stdout)
 _handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -25,30 +26,10 @@ logger.addHandler(_handler)
 timestamp = time.time()
 timestamp_str = str(pd.Timestamp.fromtimestamp(timestamp)).split('.')[0]
 
-def get_alert_tables(engine):
-	logger.info('getting tables ...')
-	table_names = engine.table_names()
-	output = []
-	for name in table_names:
-		if not(name.startswith('alerts')):
-			continue
-		if name.endswith('_subscription'):
-			continue
-		if name.endswith('_tokens'):
-			continue
-		output.append(name)
-	# end for
-	return output
-# end def
-
-def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
-	logger.info('working on table "%s" ...' % alert_table)
-	# find all unprocessed entries
-	cmd = 'SELECT * FROM {alert_table} WHERE _isProcessed=0 AND tempo="{tempo}"'.format(
-		alert_table = alert_table,
-		tempo       = tempo,
-	) # end cmd
-	DF = pd.read_sql_query(cmd, con=conn)
+def main(tempo, sender_email, sendgrid_token):
+	logger.info('working on table "%s" ...' % Alert.__table__.name)
+	
+	DF = Alert.list_alerts(tempo=tempo)
 
 	# formatting entries
 	DF['timestamp'] = [pd.Timestamp.fromtimestamp(val).isoformat()+'Z' for val in DF['_updated_at']]
@@ -61,12 +42,11 @@ def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
 	# end for
 	for channel, _DF in DF_channels.items():
 		logger.info('processing '+channel)
-		handle_one_channel(alert_table, _DF, channel, tempo, conn, sender_email, sendgrid_token)
+		handle_one_channel(_DF, channel, tempo, sender_email, sendgrid_token)
 	# end for
-
 # end def
 
-def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, sendgrid_token):
+def handle_one_channel(DF, channel, tempo, sender_email, sendgrid_token):
 	logger.info('working on channel "%s" ...' % channel)
 	# separate title to dfiffent dataframe
 	DFs = {}
@@ -85,9 +65,7 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 	writer.save()
 
 	# read subscriptions
-	cmd = "SELECT * FROM alerts_backend_subscription WHERE channel='{channel}' AND status='active'"
-	cmd = cmd.format(channel='generalalerts')
-	DF_subscription = pd.read_sql_query(cmd, con=conn)
+	DF_subscription = Subscription.list_subs(channel='general')
 	targets = list(DF_subscription.transpose().to_dict().values())
 
 	# send the emails
@@ -96,7 +74,7 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 
 		# build email
 		_email = item['email']
-		username = item['username']
+		username = item['user_name']
 		subject = '[{tempo}-alerts] {channel} {timestamp}'.format(
 			tempo   = tempo,
 			channel = channel,
@@ -106,6 +84,7 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 
 		# send email
 		logger.info(' send email to %s' % username)
+		print(sendgrid_token)
 		res = opends.easymail.send_email(
 			emailUser = sender_email,
 			recipient = _email,
@@ -121,55 +100,30 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 
 	# mark channel entries as processed
 	logger.info('updating alert entry status ...')
-	cmd_template = 'UPDATE {tblname} SET _IsProcessed=TRUE, _processed_at={timestamp} WHERE _uuid="{UUID}"'
+	
 	_uuids = DF['_uuid'].values
 	for _uuid in _uuids:
-		cmd = cmd_template.format(
-			tblname = alert_table,
-			UUID    = _uuid,
-			timestamp = timestamp,
-		) # end cmd
-		conn.execute(cmd)
+		data = {'alert_uuid': _uuid, 'is_processed': True, 'processed_at': timestamp}
+		alert = Alert(**data)
+		alert.update()
 	# end for
 	return responses
-# end def
-
-def main(conn_str, sendgrid_token, sender_email, tempo):
-	# initiate DB connection
-	engine = sqlalchemy.create_engine(conn_str)
-	conn = engine.connect()
-
-	# get all alert tables
-	alert_tables = get_alert_tables(engine)
-	for alert_table in alert_tables:
-		handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token)
-	# end for
 # end def
 
 def cli():
 	import argparse
 	parser = argparse.ArgumentParser(description='Send alerts through emails')
-	parser.add_argument('--config',  help='path to configuration file (.yaml)', required=True)
 	parser.add_argument('--tempo',   help='tempo of the alert entries. Supports only "hourly" and "daily"', required=True)
 	args = vars(parser.parse_args())
 
-	config_file = args['config'] # os.environ['HOME']+'/.keys/scube_alerter.key.yaml'
-	tempo       = args['tempo']
+	tempo = args['tempo']
 	assert tempo in ['hourly', 'daily']
-	# read configuration
-	with open(config_file, 'r') as fin:
-		configs = yaml.load(fin, Loader=yaml.SafeLoader)
-		conn_str       = configs['conn_str']
-		sendgrid_token = configs['sendgrid_token']
-		sender_email   = configs['sender_email']
-	# end with
 
 	# actually run
 	main(
-	  conn_str       = conn_str, 
-	  sendgrid_token = sendgrid_token, 
-	  sender_email   = sender_email,
-	  tempo          = tempo
+		tempo          = tempo,
+		sender_email   = os.getenv('SENDER_EMAIL'),
+	 	sendgrid_token = os.getenv('SENDGRID_TOKEN') 
 	) # end main
 # end def
 

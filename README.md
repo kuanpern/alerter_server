@@ -89,3 +89,27 @@ CREATE TABLE `alerts_backend_tokens` (
   PRIMARY KEY (`_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 ```
+
+## To use this as a python package
+- in requirements.txt, add "-e git+git@github.com:kuanpern/alerter_server.git@dev_qq#egg=alerter"
+- install
+
+	$ venv/bin/pip3 install -r requirements.txt
+	
+- go to venv/src/alerter
+	
+	$cp .env.example .env
+	$vi .env
+	$# replace configurations
+	
+- usage
+	
+	from alerter import Alerter
+
+	token='sola'
+	title='Test'
+	msg='test'
+	channel='general'
+	tempo='real-time'
+	alerter = Alerter(token=token, title=title, msg=msg, channel=channel, tempo=tempo)
+	print(alerter.send())
