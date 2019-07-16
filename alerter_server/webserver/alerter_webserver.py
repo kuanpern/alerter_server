@@ -7,9 +7,9 @@ import opends.easy_messaging
 from multiprocessing import Process
 import flask
 from flask import Flask, abort
-import utils
 import logging
 logger = logging.getLogger()
+from alerter_server.utils import alertController
 
 # initialize flask app
 app = Flask(__name__)
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	engine = sqlalchemy.create_engine(conn_str)
 
 	# initialize the controller
-	controller = utils.Controller(conn_str)
+	controller = alertController(conn_str)
 
 	# start the app
 	app.run(host=host, port=port, debug=debug_mode)
