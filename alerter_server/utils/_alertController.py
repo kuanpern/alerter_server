@@ -2,6 +2,7 @@ import uuid
 import json
 import time
 import pandas as pd
+import numpy as np
 import copy
 import sqlalchemy
 import numbers
@@ -9,7 +10,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Text, REAL, String, Boolean
 
-class Controller:
+class alertController:
 	alert_cols = ['_uuid', 'title', 'msg', 'channel', '_updated_at', '_IsProcessed', '_processed_at']
 	alert_template = {_: None for _ in alert_cols}
 
@@ -58,22 +59,30 @@ class Controller:
 		self.alerttable = name
 	# end def
 
-	def list_alerttables(self, prefix='alerts_'):
+	def list_alerttables(self, prefix='alerts_', non_suffixes=['_subscription', '_tokens']):
 		"""List all (alert) tables in the database
 
 		Args:
 		  :None
 
 		Returns:
-		  :List of String
+		  :List of Strings
 		"""
 		assert isinstance(prefix, str)
-		ans = self.conn_engine.table_names()
-		if prefix is None:
-			return ans
-		# end if
-		ans = [_ for _ in ans if _.startswith(prefix)]
-		return ans
+
+		table_names = self.conn_engine.table_names()
+		output = []
+		for name in table_names:
+			if not(name.startswith(prefix)):
+				continue
+			# end if
+			if np.any([name.endswith(suffix) for suffix in non_suffixes]):
+				continue
+			# end for
+			output.append(name)
+		# end for
+
+		return output
 	# end def
 
 	def export_alerttable(self, name):
