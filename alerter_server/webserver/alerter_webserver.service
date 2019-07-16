@@ -7,7 +7,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/home/ubuntu/alerter_server/alerter_server/webserver
 Environment="PATH=/home/ubuntu/alerter_server/venv/bin"
-ExecStart=/home/ubuntu/alerter_server/venv/bin/gunicorn --config /home/ubuntu/alerter_server/alerter_server/webserver/alerter_webserver.ini wsgi:app
+ExecStart=/home/ubuntu/alerter_server/venv/bin/gunicorn --config /home/ubuntu/alerter_server/alerter_server/webserver/alerter_webserver.ini --preload wsgi:app
 
 [Install]
 WantedBy=multi-user.target

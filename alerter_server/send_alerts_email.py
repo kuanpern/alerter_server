@@ -21,10 +21,6 @@ logger.addHandler(_handler)
 # support other email service provider
 # if too big, upload to s3, send s3 link
 
-# timestamp
-timestamp = time.time()
-timestamp_str = str(pd.Timestamp.fromtimestamp(timestamp)).split('.')[0]
-
 def get_alert_tables(engine):
 	logger.info('getting tables ...')
 	table_names = engine.table_names()
@@ -68,6 +64,11 @@ def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
 
 def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, sendgrid_token):
 	logger.info('working on channel "%s" ...' % channel)
+
+	# timestamp
+	timestamp = time.time()
+	timestamp_str = str(pd.Timestamp.fromtimestamp(timestamp)).split('.')[0]
+
 	# separate title to dfiffent dataframe
 	DFs = {}
 	for title in DF['title'].unique():

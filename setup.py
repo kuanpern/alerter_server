@@ -34,6 +34,8 @@ setup(
       'sendgrid>=5.3',
       'slackclient>=2.0',
       'SQLAlchemy>=1.2',
+      'apscheduler>3.5',
+      'gunicorn==19.8.0'
    ],
     entry_points = {
       'console_scripts': [

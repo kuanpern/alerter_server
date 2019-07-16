@@ -9,7 +9,10 @@ import flask
 from flask import Flask, abort
 import logging
 logger = logging.getLogger()
+import alerter_server
 from alerter_server.utils import alertController
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 # initialize flask app
 app = Flask(__name__)
@@ -21,10 +24,41 @@ with open(config_file, 'r') as fin:
 # end with
 db_conn_str = configs['conn_str']
 slack_token = configs['slack_token']
+timezone    = configs['timezone']
+sendgrid_token = configs['sendgrid_token']
+sender_email   = configs['sender_email']
+
+def send_hourly_emails():
+	return alerter_server.send_alerts_email.main(
+	  conn_str       = db_conn_str,
+	  sendgrid_token = sendgrid_token,
+	  sender_email   = sender_email,
+	  tempo          = 'hourly'
+	) # end send mail
+# end def
+
+def send_daily_emails():
+	return alerter_server.send_alerts_email.main(
+	  conn_str       = db_conn_str,
+	  sendgrid_token = sendgrid_token,
+	  sender_email   = sender_email,
+	  tempo          = 'daily'
+	) # end send mail
+# end def
+
+# init a scheduler
+scheduler = BackgroundScheduler({'apscheduler.timezone': timezone})
+scheduler.start()
+# - add hourly job
+scheduler.add_job(send_hourly_emails, CronTrigger.from_crontab('0 * * * *'))
+# - add daily job
+scheduler.add_job(send_daily_emails,  CronTrigger.from_crontab('0 18 * * *')) # TODO: make configurable
+
 
 # init engine
 engine = sqlalchemy.create_engine(db_conn_str)
 controller = alertController(db_conn_str)
+
 
 def put_db(inputs):
 	tblname = inputs.pop('tblname')
