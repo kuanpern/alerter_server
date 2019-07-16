@@ -103,7 +103,7 @@ CREATE TABLE `tokens` (
 	$# replace configurations
 	
 - usage
-	
+```
 	from alerter import Alerter
 
 	token='sola'
@@ -111,5 +111,6 @@ CREATE TABLE `tokens` (
 	msg='test'
 	channel='general'
 	tempo='real-time'
-	alerter = Alerter(token=token, title=title, msg=msg, channel=channel, tempo=tempo)
-	print(alerter.send())
+	alerter = Alerter(token=token)
+	print(alerter.send(title=title, msg=msg, channel=channel, tempo=tempo))
+```
