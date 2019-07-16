@@ -53,7 +53,7 @@ See tests/ for example of adding alert through python library and RESTful API ca
 
 * main alert table
 ```
-CREATE TABLE `alerts_backend` (
+CREATE TABLE `alerts` (
   `_uuid` varchar(40) NOT NULL,
   `title` text,
   `msg` text,
@@ -68,7 +68,7 @@ CREATE TABLE `alerts_backend` (
 
 * subscription table
 ```
-CREATE TABLE `alerts_backend_subscription` (
+CREATE TABLE `subscription` (
   `_uuid` varchar(40) NOT NULL,
   `username` text,
   `_created_at` double DEFAULT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE `alerts_backend_subscription` (
 
 * tokens table
 ```
-CREATE TABLE `alerts_backend_tokens` (
+CREATE TABLE `tokens` (
   `_uuid` varchar(40) NOT NULL,
   `token` text,
   `_created_at` double DEFAULT NULL,
