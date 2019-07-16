@@ -14,6 +14,18 @@ from alerter_server.utils import alertController
 # initialize flask app
 app = Flask(__name__)
 
+# read configs
+config_file = os.environ['ALERTER_CONFIG_FILE']
+with open(config_file, 'r') as fin:
+	configs = yaml.load(fin, Loader=yaml.SafeLoader)
+# end with
+db_conn_str = configs['conn_str']
+slack_token = configs['slack_token']
+
+# init engine
+engine = sqlalchemy.create_engine(db_conn_str)
+controller = alertController(db_conn_str)
+
 def put_db(inputs):
 	tblname = inputs.pop('tblname')
 	acceptables = ['title', 'msg', 'channel', 'alert_uuid', 'is_processed', 'processed_at', 'tempo']
@@ -45,6 +57,12 @@ def send_msg(inputs):
 	inputs['processed_at'] = time.time()
 	put_db(inputs)
 # end def
+
+@app.route('/', methods = ['GET'])
+def index():
+	return 'Hi this is alerter server speaking.'
+# end def
+
 
 @app.route('/<tblname>', methods = ['POST'])
 def recv(tblname):
@@ -89,29 +107,5 @@ def recv(tblname):
 # end def
 
 if __name__ == '__main__':
-	import argparse
-	parser = argparse.ArgumentParser(description='Send alerts through emails')
-	parser.add_argument('--host',   help='server host name', type=str, required=False, default='0.0.0.0')
-	parser.add_argument('--port',   help='port number', type=int, required=False, default=8080)
-	parser.add_argument('--debug',  help='debug mode', type=bool, required=False, default=True)
-	parser.add_argument('--config', help='path to configuration file (.yaml)', required=True)
-	args = vars(parser.parse_args())
-
-	# read configuration
-	host = args['host']
-	port = args['port']
-	debug_mode = args['debug']
-	config_file = args['config'] # os.environ['HOME']+'/.keys/scube_alerter.key.yaml'
-	with open(config_file, 'r') as fin:
-		configs = yaml.load(fin, Loader=yaml.SafeLoader)
-		conn_str    = configs['conn_str']
-		slack_token = configs['slack_token']
-	# end with
-	engine = sqlalchemy.create_engine(conn_str)
-
-	# initialize the controller
-	controller = alertController(conn_str)
-
-	# start the app
-	app.run(host=host, port=port, debug=debug_mode)
+	app.run(host='0.0.0.0', port=8080, debug=True)
 # end if
