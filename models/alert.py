@@ -30,7 +30,7 @@ class Alert(Base):
     ############################
     ###### CRUD for alerts #####
     ############################
-    def __init__(self, title=None, msg=None, channel=None, tempo=None, alert_uuid=None, is_processed=False, processed_at=None):
+    def __init__(self, title=None, msg=None, channel=None, tempo=None, alert_uuid=None, is_processed=None, processed_at=None):
         """Add a alert to the alert table
 
         Args:
@@ -63,6 +63,9 @@ class Alert(Base):
         
         if self._uuid is None:
             self._uuid = str(uuid.uuid4())
+        
+        if self._IsProcessed is None:
+            self._IsProcessed = False
         
         if self._processed_at is None:
             self._processed_at = -1

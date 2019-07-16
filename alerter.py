@@ -39,7 +39,26 @@ class Alerter:
         # end if
         p.start()
     
-        return json.dumps({'uuid': _uuid})
+        return {'uuid': _uuid}
+    
+    def update_alert(self, uuid, title=None, msg=None, channel=None, tempo=None):
+        data = {
+            'alert_uuid': uuid,
+            'title': title,
+            'msg': msg,
+            'channel': channel,
+            'tempo': tempo
+        }
+        print(data)
+        alert = Alert(**data)
+        alert.update()
+        
+    def delete_alert(self, uuid):
+        data = {
+            'alert_uuid': uuid
+        }
+        alert = Alert(**data)
+        alert.delete()
         
     def _validate(self):
         # validate token
@@ -82,6 +101,14 @@ if __name__ == '__main__':
     title='Test'
     msg='test'
     channel='general'
-    tempo='real-time' # daily, hourly
+    tempo='daily'
     alerter = Alerter(token=token)
-    print(alerter.send(title=title, msg=msg, channel=channel, tempo=tempo))
+    res = alerter.send(title=title, msg=msg, channel=channel, tempo=tempo)
+    uuid = res['uuid']
+    print(uuid)
+    time.sleep(5)
+    # update alert
+    alerter.update_alert(uuid=uuid, title='HAHAH')
+    # delete alert
+    time.sleep(5)
+    alerter.delete_alert(uuid=uuid)
