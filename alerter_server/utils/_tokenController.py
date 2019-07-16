@@ -123,7 +123,7 @@ class tokenController:
 		  Column('_uuid',       String(40), primary_key=True),
 		  Column('token',       Text,       nullable=False),
 		  Column('_created_at', REAL,       nullable=False),
-		  Column('status',      String(12), nullable=False),
+		  Column('status',      String(20), nullable=False),
 		) # end table
 		self.metadata.create_all(self.conn_engine)
 
