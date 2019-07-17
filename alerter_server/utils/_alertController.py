@@ -11,7 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, Text, REAL, String, Boolean
 
 class alertController:
-	alert_cols = ['_uuid', 'title', 'msg', 'channel', '_updated_at', '_IsProcessed', '_processed_at']
+	alert_cols = ['_uuid', 'title', 'msg', 'channel', 'tempo', '_updated_at', '_IsProcessed', '_processed_at']
 	alert_template = {_: None for _ in alert_cols}
 
 	def _get_session(self):
@@ -127,6 +127,7 @@ class alertController:
 		  Column('title',   Text),
 		  Column('msg',  Text),
 		  Column('channel', Text),
+		  Column('tempo', String(40), nullable=False),
 		  Column('_updated_at', REAL, nullable=False),
 		  Column('_IsProcessed', Boolean,  nullable=False, default=False),
 		  Column('_processed_at', REAL, nullable=False),
