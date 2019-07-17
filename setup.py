@@ -21,21 +21,18 @@ setup(
     include_package_data=True,
     package_data={
     },
-    dependency_links=[
-        'git+https://kuanpern@bitbucket.org/kuanpern/open_data_sciences.git#egg=opends',
-    ],
     install_requires=[
       'Flask>=1.0',
       'mysqlclient>=1.3',
       'numpy>=1.15',
-      'opends>=0.0.0',
+      'opends @ git+https://kuanpern@bitbucket.org/kuanpern/open_data_sciences.git#egg=opends',
       'PyYAML>=5.0',
       'requests>=2.20',
-      'sendgrid>=5.3',
       'slackclient>=2.0',
       'SQLAlchemy>=1.2',
-      'apscheduler>3.5',
-      'gunicorn==19.8.0'
+      'apscheduler>=3.5',
+      'gunicorn>=19.7',
+      'mysqlclient>=1.3',
    ],
     entry_points = {
       'console_scripts': [

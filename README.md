@@ -4,7 +4,7 @@ A really simple server to receive alert message and put to database, or send to 
 ### Installation (Server side)
 ```
 $ sudo apt-get install virtualenv python-mysqldb python3-dev libmysqlclient-dev gcc
-$ git clone https://kuanpern@bitbucket.org/kuanpern/alerter_server.git
+$ git clone https://github.com/kuanpern/alerter_server.git
 $ cd alerter_server
 $ virtualenv -ppython3 venv; venv/bin/pip install .
 ```
@@ -52,7 +52,7 @@ subs_controller.init_subscriptiontable(name='test', prefix='alerts_', suffix='_s
 
 
 # issue a new token
-token_controller.set_tokentable('alerts_test_subscription')
+token_controller.set_tokentable('alerts_test_tokens')
 token = token_controller.issue_new_token()
 print(token) # <- send this to subscriber(s)
 
