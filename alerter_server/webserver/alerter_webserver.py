@@ -10,6 +10,7 @@ from flask import Flask, abort
 import logging
 logger = logging.getLogger()
 import alerter_server
+import alerter_server.send_alerts_email
 from alerter_server.utils import alertController
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger

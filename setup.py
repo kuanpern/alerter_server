@@ -33,6 +33,7 @@ setup(
       'apscheduler>=3.5',
       'gunicorn>=19.7',
       'mysqlclient>=1.3',
+      'xlsxwriter>=1.0',
    ],
     entry_points = {
       'console_scripts': [
