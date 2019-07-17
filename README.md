@@ -40,17 +40,21 @@ conn_str = 'mysql://admin:password@hostname:3306/alerts'
 # setup an alert table
 alert_controller = alertController(conn_str)
 alert_controller.init_alerttable(name='test', prefix='alerts_')
+
 # setup a token table
 token_controller = tokenController(conn_str)
 token_controller.init_tokentable(name='test', suffix='_tokens', prefix='alerts_')
+
 # setup a subscription table
 subs_controller = subscriptionController(conn_str)
 subs_controller.init_subscriptiontable(name='test', prefix='alerts_', suffix='_subscription')
+
 
 # issue a new token
 token_controller.set_tokentable('alerts_test_subscription')
 token = token_controller.issue_new_token()
 print(token) # <- send this to subscriber(s)
+
 # register a new subscriber
 subs_controller.set_subscriptiontable('alerts_test_subscription')
 subs_controller.add_subscription(
