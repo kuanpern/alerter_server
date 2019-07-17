@@ -17,6 +17,7 @@ then start the webserver
 ```
 $ venv/bin/python alerter_server/webserver/alerter_webserver.py
 ```
+see alerter_server/webserver/alerter_webserver.service (and relevant config file) for deployment with gunicorn and daemonization with systemd.
 
 #### Configurations
 config file should be a yaml file like
