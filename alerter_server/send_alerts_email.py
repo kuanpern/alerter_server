@@ -86,8 +86,10 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 	writer.save()
 
 	# read subscriptions
-	cmd = "SELECT * FROM {alert_table}_subscription WHERE channel='{channel}' AND status='active'".format(alert_table=alert_table)
-	cmd = cmd.format(channel='generalalerts')
+	cmd = "SELECT * FROM {alert_table}_subscription WHERE channel='{channel}' AND status='active'".format(
+		alert_table=alert_table,
+		channel=channel
+	) # end cmd
 	DF_subscription = pd.read_sql_query(cmd, con=conn)
 	targets = list(DF_subscription.transpose().to_dict().values())
 
