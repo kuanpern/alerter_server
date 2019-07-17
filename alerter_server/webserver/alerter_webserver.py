@@ -22,7 +22,7 @@ config_file = os.environ['ALERTER_CONFIG_FILE']
 with open(config_file, 'r') as fin:
 	configs = yaml.load(fin, Loader=yaml.SafeLoader)
 # end with
-db_conn_str = configs['conn_str']
+db_conn_str = configs['db_conn_str']
 slack_token = configs['slack_token']
 timezone    = configs['timezone']
 sendgrid_token = configs['sendgrid_token']
