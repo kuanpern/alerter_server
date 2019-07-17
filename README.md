@@ -133,3 +133,9 @@ CREATE TABLE `alerts_test_tokens` (
   PRIMARY KEY (`_uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 ```
+
+
+### ROADMAP
+* use sqlalchemy rather than plain sql
+* skip email if there is no alert
+* fix naming convention and autostart project
