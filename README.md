@@ -3,6 +3,7 @@ A really simple server to receive alert message and put to database, or send to 
 
 ### Installation (Server side)
 ```
+$ sudo apt-get install virtualenv python-mysqldb python3-dev libmysqlclient-dev gcc
 $ git clone https://kuanpern@bitbucket.org/kuanpern/alerter_server.git
 $ cd alerter_server
 $ virtualenv -ppython3 venv; venv/bin/pip install .
