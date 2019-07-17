@@ -3,7 +3,7 @@ A really simple server to receive alert message and put to database, or send to 
 
 ### Installation (Server side)
 ```
-$ git clone https://kuanpern@bitbucket.org/kuanpern/alerter_server.git
+$ git clone https://github.com/kuanpern/alerter_server.git
 $ cd alerter_server
 $ virtualenv -ppython3 venv; venv/bin/pip install .
 ```
