@@ -184,7 +184,7 @@ class tokenController:
 		curtime = int(time.time())
 		_token = copy.deepcopy(self.token_template)
 		_token.update({
-		  "_uuid"        :  str(uuid.uuid4()),
+		  "_uuid"        : str(uuid.uuid4()),
 		  "token"        : new_token,
 		  "_created_at"  : curtime,
 		  "status"       : 'active',

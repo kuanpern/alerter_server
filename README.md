@@ -51,7 +51,7 @@ subs_controller.init_subscriptiontable(name='test', prefix='alerts_', suffix='_s
 
 
 # issue a new token
-token_controller.set_tokentable('alerts_test_subscription')
+token_controller.set_tokentable('alerts_test_tokens')
 token = token_controller.issue_new_token()
 print(token) # <- send this to subscriber(s)
 
