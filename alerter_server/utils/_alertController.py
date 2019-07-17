@@ -127,7 +127,7 @@ class alertController:
 		  Column('title',   Text),
 		  Column('msg',  Text),
 		  Column('channel', Text),
-		  Column('tempo', String(40), nullable=False),
+		  Column('tempo', String(12), nullable=False),
 		  Column('_updated_at', REAL, nullable=False),
 		  Column('_IsProcessed', Boolean,  nullable=False, default=False),
 		  Column('_processed_at', REAL, nullable=False),
