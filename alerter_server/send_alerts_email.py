@@ -64,6 +64,11 @@ def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
 
 def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, sendgrid_token):
 	logger.info('working on channel "%s" ...' % channel)
+	
+	if len(DF) == 0:
+		logger.info(' - no alerts')
+		return
+	# end if
 
 	# timestamp
 	timestamp = time.time()
@@ -90,6 +95,7 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 		alert_table=alert_table,
 		channel=channel
 	) # end cmd
+	logger.info(cmd)
 	DF_subscription = pd.read_sql_query(cmd, con=conn)
 	targets = list(DF_subscription.transpose().to_dict().values())
 
