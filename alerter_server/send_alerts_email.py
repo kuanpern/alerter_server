@@ -3,6 +3,7 @@ import sys
 import yaml
 import time
 import sqlalchemy
+from sqlalchemy.orm import sessionmaker
 import pandas as pd
 import uuid
 import opends
@@ -39,11 +40,11 @@ def get_alert_tables(engine):
 def handle_one_table(alert_table, tempo, conn, email_provider, sender_email, email_api_key ):
 	logger.info('working on table "%s" ...' % alert_table)
 	# find all unprocessed entries
-	cmd = 'SELECT * FROM {alert_table} WHERE _isProcessed=0 AND tempo="{tempo}"'.format(
-		alert_table = alert_table,
-		tempo       = tempo,
-	) # end cmd
-	DF = pd.read_sql_query(cmd, con=conn)
+	
+	# TODO: to improve query pattern
+	DF = pd.read_sql_table(alert_table, con=conn)
+	DF = DF[DF['_IsProcessed'] == False]
+	DF = DF[DF['tempo']        == tempo]
 
 	# formatting entries
 	DF['timestamp'] = [pd.Timestamp.fromtimestamp(val).isoformat()+'Z' for val in DF['_updated_at']]
@@ -64,6 +65,10 @@ def handle_one_table(alert_table, tempo, conn, email_provider, sender_email, ema
 def handle_one_channel(alert_table, DF, channel, tempo, conn, email_provider, sender_email, email_api_key ):
 	logger.info('working on channel "%s" ...' % channel)
 	
+	meta = sqlalchemy.MetaData()
+	meta.reflect(bind=conn)
+	table = sqlalchemy.Table(alert_table, meta, autoload=True, autoload_with=conn.engine)
+
 	if len(DF) == 0:
 		logger.info(' - no alerts')
 		return
@@ -90,12 +95,11 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, email_provider, se
 	writer.save()
 
 	# read subscriptions
-	cmd = "SELECT * FROM {alert_table}_subscription WHERE channel='{channel}' AND status='active'".format(
-		alert_table=alert_table,
-		channel=channel
-	) # end cmd
-	logger.info(cmd)
-	DF_subscription = pd.read_sql_query(cmd, con=conn)
+	# TODO: to improve query pattern
+	tblname = alert_table+'_subscription'
+	DF_subscription = pd.read_sql_table(tblname, con=conn)
+	DF_subscription = DF_subscription[DF_subscription['channel'] == channel]
+	DF_subscription = DF_subscription[DF_subscription['status' ] == 'active']
 	targets = list(DF_subscription.transpose().to_dict().values())
 
 	# send the emails
@@ -130,17 +134,19 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, email_provider, se
 
 	# mark channel entries as processed
 	logger.info('updating alert entry status ...')
-	cmd_template = 'UPDATE {tblname} SET _IsProcessed=TRUE, _processed_at={timestamp} WHERE _uuid="{UUID}"'
+	Session = sessionmaker(bind=conn)
+	session = Session()
+
 	_uuids = DF['_uuid'].values
 	for _uuid in _uuids:
-		cmd = cmd_template.format(
-			tblname = alert_table,
-			UUID    = _uuid,
-			timestamp = timestamp,
-		) # end cmd
-		conn.execute(cmd)
+		stmt = table.update() \
+		  .where(table.c._uuid == _uuid) \
+		  .values({'_IsProcessed': True, '_processed_at': timestamp})
+		session.execute(stmt)
 	# end for
-	return responses
+	session.commit()
+	session.close()
+	
 # end def
 
 def main(conn_str, email_api_key , email_provider, sender_email, tempo):
@@ -153,6 +159,7 @@ def main(conn_str, email_api_key , email_provider, sender_email, tempo):
 	for alert_table in alert_tables:
 		handle_one_table(alert_table, tempo, conn, email_provider, sender_email, email_api_key )
 	# end for
+	conn.close()
 # end def
 
 def cli():
