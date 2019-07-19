@@ -14,6 +14,7 @@ import alerter_server.send_alerts_email
 from alerter_server.utils import alertController
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
+from sqlalchemy.orm import sessionmaker, load_only
 
 # initialize flask app
 app = Flask(__name__)
@@ -26,13 +27,15 @@ with open(config_file, 'r') as fin:
 db_conn_str = configs['db_conn_str']
 slack_token = configs['slack_token']
 timezone    = configs['timezone']
-sendgrid_token = configs['sendgrid_token']
+email_provider = configs['email_provider']
+email_api_key  = configs['email_api_key']
 sender_email   = configs['sender_email']
 
 def send_hourly_emails():
 	return alerter_server.send_alerts_email.main(
 	  conn_str       = db_conn_str,
-	  sendgrid_token = sendgrid_token,
+	  email_api_key  = email_api_key,
+	  email_provider = email_provider,
 	  sender_email   = sender_email,
 	  tempo          = 'hourly'
 	) # end send mail
@@ -41,7 +44,8 @@ def send_hourly_emails():
 def send_daily_emails():
 	return alerter_server.send_alerts_email.main(
 	  conn_str       = db_conn_str,
-	  sendgrid_token = sendgrid_token,
+	  email_api_key  = email_api_key,
+	  email_provider = email_provider,
 	  sender_email   = sender_email,
 	  tempo          = 'daily'
 	) # end send mail
@@ -59,7 +63,7 @@ scheduler.add_job(send_daily_emails,  CronTrigger.from_crontab('0 18 * * *')) # 
 # init engine
 engine = sqlalchemy.create_engine(db_conn_str)
 controller = alertController(db_conn_str)
-
+Session = sessionmaker(bind=engine)
 
 def put_db(inputs):
 	tblname = inputs.pop('tblname')
@@ -98,6 +102,8 @@ def index():
 	return 'Hi this is alerter server speaking.'
 # end def
 
+        
+
 
 @app.route('/<tblname>', methods = ['POST'])
 def recv(tblname):
@@ -109,11 +115,17 @@ def recv(tblname):
 	# end if
 
 	# get tokens
-	cmd = 'SELECT token FROM {tblname}_tokens WHERE status = "active"'.format(tblname=tblname)
-	conn = engine.connect()
-	res = conn.execute(cmd)
-	conn.close()
-	tokens = [_[0] for _ in res]
+	token_tblname = tblname+'_tokens'
+	
+	meta = sqlalchemy.MetaData()
+	meta.reflect(bind=engine)
+	table = sqlalchemy.Table(token_tblname, meta, autoload=True, autoload_with=engine)
+	
+	session = Session()
+	rows = session.query(table).filter(table.c.status == 'active').all()
+	session.close()
+	
+	tokens = [row.token for row in rows]
 
 	# authentication
 	token = content.get('token', None)
