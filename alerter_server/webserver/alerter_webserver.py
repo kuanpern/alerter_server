@@ -55,7 +55,7 @@ def send_daily_emails():
 scheduler = BackgroundScheduler({'apscheduler.timezone': timezone})
 scheduler.start()
 # - add hourly job
-scheduler.add_job(send_hourly_emails, CronTrigger.from_crontab('* * * * *'))
+scheduler.add_job(send_hourly_emails, CronTrigger.from_crontab('0 * * * *'))
 # - add daily job
 scheduler.add_job(send_daily_emails,  CronTrigger.from_crontab('0 18 * * *')) # TODO: make configurable
 
