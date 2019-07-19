@@ -18,7 +18,6 @@ logger.setLevel(logging.INFO)
 logger.addHandler(_handler)
 
 # TODO:
-# support other email service provider
 # if too big, upload to s3, send s3 link
 
 def get_alert_tables(engine):
@@ -37,7 +36,7 @@ def get_alert_tables(engine):
 	return output
 # end def
 
-def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
+def handle_one_table(alert_table, tempo, conn, email_provider, sender_email, email_api_key ):
 	logger.info('working on table "%s" ...' % alert_table)
 	# find all unprocessed entries
 	cmd = 'SELECT * FROM {alert_table} WHERE _isProcessed=0 AND tempo="{tempo}"'.format(
@@ -57,12 +56,12 @@ def handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token):
 	# end for
 	for channel, _DF in DF_channels.items():
 		logger.info('processing '+channel)
-		handle_one_channel(alert_table, _DF, channel, tempo, conn, sender_email, sendgrid_token)
+		handle_one_channel(alert_table, _DF, channel, tempo, conn, email_provider, sender_email, email_api_key )
 	# end for
 
 # end def
 
-def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, sendgrid_token):
+def handle_one_channel(alert_table, DF, channel, tempo, conn, email_provider, sender_email, email_api_key ):
 	logger.info('working on channel "%s" ...' % channel)
 	
 	if len(DF) == 0:
@@ -116,9 +115,10 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 		# send email
 		logger.info(' send email to %s' % username)
 		res = opends.easymail.send_email(
+			provider  = email_provider,
 			emailUser = sender_email,
 			recipient = _email,
-			api_key = sendgrid_token,
+			api_key = email_api_key ,
 			subject = subject,
 			text = text,
 			attachmentFilePaths = [filename]
@@ -143,7 +143,7 @@ def handle_one_channel(alert_table, DF, channel, tempo, conn, sender_email, send
 	return responses
 # end def
 
-def main(conn_str, sendgrid_token, sender_email, tempo):
+def main(conn_str, email_api_key , email_provider, sender_email, tempo):
 	# initiate DB connection
 	engine = sqlalchemy.create_engine(conn_str)
 	conn = engine.connect()
@@ -151,7 +151,7 @@ def main(conn_str, sendgrid_token, sender_email, tempo):
 	# get all alert tables
 	alert_tables = get_alert_tables(engine)
 	for alert_table in alert_tables:
-		handle_one_table(alert_table, tempo, conn, sender_email, sendgrid_token)
+		handle_one_table(alert_table, tempo, conn, email_provider, sender_email, email_api_key )
 	# end for
 # end def
 
@@ -169,14 +169,16 @@ def cli():
 	with open(config_file, 'r') as fin:
 		configs = yaml.load(fin, Loader=yaml.SafeLoader)
 		conn_str       = configs['conn_str']
-		sendgrid_token = configs['sendgrid_token']
+		email_api_key  = configs['email_api_key']
 		sender_email   = configs['sender_email']
+		email_provider = configs['email_provider']
 	# end with
 
 	# actually run
 	main(
 	  conn_str       = conn_str, 
-	  sendgrid_token = sendgrid_token, 
+	  email_api_key  = email_api_key , 
+	  email_provider = email_provider,
 	  sender_email   = sender_email,
 	  tempo          = tempo
 	) # end main
