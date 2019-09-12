@@ -37,7 +37,7 @@ setup(
    ],
     entry_points = {
       'console_scripts': [
-        'send_alerts_email=alerter_server.send_alerts_email.py:cli',
+        'send_alerts_email=alerter_server.send_alerts_email:cli',
       ]
     },
 )

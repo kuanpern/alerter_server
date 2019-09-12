@@ -5,10 +5,10 @@ After=network.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/home/ubuntu/alerter_server/alerter_server/webserver
-Environment="PATH=/home/ubuntu/alerter_server/venv/bin"
-Environment="ALERTER_CONFIG_FILE=/home/ubuntu/.keys/alerter_configs.yaml"
-ExecStart=/home/ubuntu/alerter_server/venv/bin/gunicorn --config /home/ubuntu/alerter_server/alerter_server/webserver/alerter_webserver.ini --preload wsgi:app
+WorkingDirectory=/home/scube/alerter_server/alerter_server/webserver
+Environment="PATH=/home/scube/alerter_server/venv/bin"
+Environment="ALERTER_CONFIG_FILE=/home/scube/.keys/alerter_configs.yaml"
+ExecStart=/home/scube/alerter_server/venv/bin/gunicorn --config /home/scube/alerter_server/alerter_server/webserver/alerter_webserver.ini --preload wsgi:app
 
 [Install]
 WantedBy=multi-user.target
