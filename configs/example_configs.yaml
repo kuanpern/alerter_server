@@ -1,5 +1,6 @@
 db_conn_str : "mysql://admin:password@hostname:3306/alerts"
 slack_token : "xoxp-a7cc5df4-47de-43a0-98c8-5f93587ba9fd69c4eda8-1288-423b-9db9-5b616965e3dc"
 timezone    : Asia/Singapore
-sendgrid_token : "SG.78a01d49-525d-43a9-8563-eb1be1d7c21b.ded61ffb.247d"
+email_provider : sendgrid
+email_api_key  : "SG.78a01d49-525d-43a9-8563-eb1be1d7c21b.ded61ffb.247d"
 sender_email   : admin@example.com
