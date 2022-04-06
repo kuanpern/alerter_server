@@ -38,7 +38,7 @@ multidict==4.5.2
 mysqlclient==1.4.2.post1
 nbconvert==5.5.0
 nbformat==4.4.0
-notebook==5.7.8
+notebook==6.4.10
 numpy==1.16.4
 -e git+https://kuanpern@bitbucket.org/kuanpern/open_data_sciences.git@d48bc93993f7f41b481f3cac9a8a6684f56c83d3#egg=opends
 openpyxl==2.6.2
