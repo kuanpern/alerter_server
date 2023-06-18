@@ -1,6 +1,9 @@
 ## Alerter server
 A really simple server to register alert message; send hourly/daily email to user, or send real-time message to slack.
 
+Note (2023-06-18): This repository is not maintained anymore. One should use better supported system (e.g. [Sentry](https://develop.sentry.dev/self-hosted/)) for this use case.
+
+
 ### Installation (Server side)
 ```
 $ sudo apt-get install virtualenv python-mysqldb python3-dev libmysqlclient-dev gcc
